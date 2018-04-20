@@ -3,23 +3,21 @@ angular.module('wheretoseeApp')
 
   function link(scope, element, attrs) {
 
-    scope.addMarker(scope.artifact);
-
+    console.log("HERE IN DIRECTIVE")
   }
 
   return {
-    template: '<div style="height:300px" class="md-whiteframe-2dp" ><md-toolbar class="demo-toolbar md-primary _md _md-toolbar-transitions">'+
+    template: '<div style="height:200px;width:300px;" class="md-whiteframe-2dp" ><md-toolbar class="demo-toolbar md-primary _md _md-toolbar-transitions">'+
                 '<div class="md-toolbar-tools">'+
                   '<h3 class="ng-binding ng-isolate-scope"><a class="docs-anchor ng-scope" ng-href="#basic-usage" name="basic-usage" href="#basic-usage">{{ artifact.name }}</a></h3>'+
                   '<span flex="" class="flex"></span>'+
-                  '<button class="md-icon-button md-button md-ink-ripple active" type="button" aria-label="Remove Artifact"  ng-click="removeArtifact($index)" style="">'+
+                  '<button class="md-icon-button md-button md-ink-ripple active" type="button" aria-label="Remove Artifact"  ng-click="artifactService.removeArtifact(idx)" style="">'+
                     '<md-icon>close</md-icon>'+
                   '</button>'+
               '</md-toolbar></div>'+
-              '<md-content> <img ng-src="{{artifact.image}}" alt="{{artifact.description}}" class="md-avatar"></md-content>'+
+              '<md-content> <img style="max-width:100%;max-height:100%;" ng-src="http://localhost:5001{{ artifact.images[0].artifactUrl }}" alt="{{artifact.images[0].description}}" class="md-avatar"></md-content>'+
               '</div>',
-
-    restrict: 'E',
+      restrict: 'E',
       link: link
   };
 });

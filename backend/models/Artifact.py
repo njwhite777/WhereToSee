@@ -9,8 +9,8 @@ class Artifact(Base):
     name = Column(String)
     description = Column(String)
 
-    images = relationship("artifactImage",backref="artifact", lazy = False)
-    coordinates = relationship("artifactCoordinates",backref="artifact",lazy=False, uselist=False)
+    images = relationship("ArtifactImage",backref="artifact", lazy = False)
+    coordinates = relationship("ArtifactCoordinates",backref="artifact",lazy=False, uselist=False)
 
     def __init__(self,name,description,images=[],coordinates=None):
         self.name=name
@@ -18,11 +18,28 @@ class Artifact(Base):
         self.images=images
         self.coordinates=coordinates
 
+    @classmethod
+    def getArtifactByID(Artifact,session,id):
+        return session.query(Artifact).get(id)
+
+    @classmethod
+    def getPartials(Artifact,session,queryString):
+        return session.query(Artifact).filter(Artifact.name.contains(queryString)).all()
+
     def addCoordinates(self,coordinates):
         self.coordinates=coordinates
 
     def addImage(self,artifactImage):
         self.images.append(artifactImage)
 
+    def getDict(self):
+        tDict = dict()
+        tDict['id']=self.id
+        tDict['name']=self.name
+        tDict['description']=self.description
+        tDict['images']=[ image.getDict() for image in self.images ]
+        tDict['coordinates']=self.coordinates.getDict()
+        return tDict
+
     def __repr__(self):
-        return "<Artifact(id='{}',name='{}',description='{}',)>".format(self.id,self.lat,self.lon)
+        return "<Artifact(id='{}',name='{}',description='{}',)>".format(self.id,self.name,self.description)

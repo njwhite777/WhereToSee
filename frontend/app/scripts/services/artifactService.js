@@ -11,7 +11,26 @@ angular.module('wheretoseeApp')
   .service('artifactService',['socketService',function(socketService){
     var socket = socketService['artifactSocket'];
 
+    var artifactData = {
 
-    return {};
+    };
 
+    var retrieveArtifact = function(data){
+      data['artifactID']=data.id;
+      socket.emit('get_artifact_by_id',data);
+    };
+
+    socket.on('retrieved_artifact',function(data){
+      artifactData[data.id]=data;
+    });
+
+    var removeArtifact = function(artifactID){
+      delete artifactData[artifactID];
+    }
+
+    return {
+      retrieveArtifact : retrieveArtifact,
+      artifactData : artifactData,
+      removeArtifact : removeArtifact
+    };
 }]);

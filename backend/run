@@ -22,10 +22,28 @@ if __name__ == '__main__':
     if(environment in ['test','debug','dev']):
         delete_db(engine)
 
+    session = Session()
     AppModelBase.metadata.create_all(engine)
 
-    if(db):
-        if(db == 'startgame'):
-            start_game_db(Session)
+    acs=[ArtifactCoordinatesModel(lat=40.09389490340147,lon=-85.62538134792705),ArtifactCoordinatesModel(lat=40.09585039419487,lon=-85.62004021718168),ArtifactCoordinatesModel(lat=40.09451269825916,lon=-85.62251577299321)]
+    aims=[ArtifactImageModel('/static/whiteoak.jpg','The white oak tree'),ArtifactImageModel('/static/entrance.jpg','The visitor center'),ArtifactImageModel('/static/greatmound.jpg','The great mound!')]
+    artifacts = [ArtifactModel(name="White Oak",description="The white oak tree"),ArtifactModel(name="Visitor Center",description="The visitor center."),ArtifactModel(name="Great Mound",description="The great mound.")]
 
+    for loc in acs:
+        session.add(loc)
+
+    for a in aims:
+        session.add(a)
+
+    for idx,artifact in enumerate(artifacts):
+        artifact.addCoordinates(acs[idx])
+        artifact.addImage(aims[idx])
+    session.commit()
+
+    # # NOTE: backrefs work, so this is a valid way to get the artifacts!
+    # artifact = session.query(ArtifactModel).get(1)
+    # print(artifact)
+    # print(artifact.images)
+    # print(artifact.coordinates)
+    # print(artifact.getDict())
     socketio.run(app,debug=True,port=5001,host='localhost')

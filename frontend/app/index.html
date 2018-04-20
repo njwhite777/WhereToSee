@@ -20,27 +20,56 @@
     <link rel="stylesheet" href="styles/main.css">
     <!-- endbuild -->
   </head>
-  <body ng-app="wheretoseeApp" ng-controller="MainCtrl">
-    <md-toolbar class="md-hue-2" >
-      <md-content>
-        <div layout-align="center" layout="row">
-          <h2 md-truncate>Wheretosee App</h2>
+  <body ng-app="wheretoseeApp" ng-controller="MainCtrl" >
+      <md-toolbar ng-show="!showSearch"  class="md-hue-2"  >
+        <div class="md-toolbar-tools">
+          <span flex></span>
+          <h2> Wheretosee </h2>
+          <span flex></span>
+        </div>
+      </md-toolbar>
+      <md-content flex layout layout-align="center">
+        <div layout-gt-sm layout-xs="column" layout="row" flex flex-gt-sm="80" flex-gt-md="60">
+          <div flex layout="column" layout-margin>
+              <md-autocomplete id="custom"
+                   ng-disabled="isDisabled"
+                   md-no-cache="noCacheResults"
+                   md-selected-item="selectedItem"
+                   md-search-text="searchText"
+                   md-input-name="autocompleteField"
+                   md-selected-item-change="selectedItemChange(item)"
+                   md-items="item in searchService.searchFieldChanged(searchText)"
+                   md-item-text="item.name"
+                   md-min-length="0"
+                   placeholder="What artifacts are you interested in seeing?">
+                <md-item-template>
+                  <span md-highlight-text="searchText" md-highlight-flags="^i">{{item.name}}</span>
+                </md-item-template>
+            </md-autocomplete>
+            <div layout="row" layout-wrap >
+              <div ng-repeat="(idx,artifact) in artifactService.artifactData" layout-margin>
+                <imagebox layout-margin></imagebox>
+              </div>
+            </div>
+          </div>
+          <div layout-margin flex>
+            <div layout="row" style="height: 92vh">
+              <map></map>
+            </div>
+          </div>
         </div>
       </md-content>
-    </md-toolbar>
-    <md-content>
-      <div layout="row">
-        <div layout-padding layout-margin flex>
-          <div ng-repeat="artifact in artifacts">
+
+      <!-- <div layout="column">
+      <div layout="row" layout-fill>
+        <div flex>
+          <!-- <div ng-repeat="artifact in artifacts">
             <imagebox></imagebox>
           </div>
         </div>
-        <div layout-padding layout-margin flex>
-          <map></map>
-        </div>
-      </div>
-    </md-content>
 
+      </div>
+    </div> -->
     <!-- Google Analytics: change UA-XXXXX-X to be your site's ID -->
      <script>
        // !function(A,n,g,u,l,a,r){A.GoogleAnalyticsObject=l,A[l]=A[l]||function(){

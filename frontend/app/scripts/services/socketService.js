@@ -15,6 +15,7 @@ angular.module('wheretoseeApp')
 
     var buildSocketObject = function(socketName){
         var socketURL = socketIOConfig.getSocketURL(socketName);
+        console.log(socketURL)
         var ioSocketConnect = io.connect(socketURL);
         var socket = socketFactory({ ioSocket: ioSocketConnect });
         return socket;

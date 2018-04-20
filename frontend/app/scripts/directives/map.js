@@ -1,15 +1,19 @@
 angular.module('wheretoseeApp')
- .directive('map', function ($interval) {
+ .directive('map', ['$interval','socketService',function ($interval,socketService) {
 
   function link(scope, element, attrs) {
     var mapDiv = $('#map');
-    mapDiv.css('height', '280px');
-    mapDiv.css('width', '350px');
+
+    mapDiv.css('height', '200px');
+    mapDiv.css('width', '400px');
 
     var theMap = L.map('map',{
       center: [40.09948255,-85.6190990636025],
       zoom: 13
     });
+
+    var socket = socketService['artifactSocket'];
+
 
     var markers = {};
     var originalPos = {};
@@ -22,27 +26,26 @@ angular.module('wheretoseeApp')
     }).addTo(theMap);
 
     theMap.setView([40.09948255,-85.6190990636025], 13,{reset: true});
-    theMap.invalidateSize();
 
     theMap.on('click', function(e) {
       console.log("Lat, Lon : " + e.latlng.lat + ", " + e.latlng.lng)
     });
 
     scope.removeMarker = function(markerData){
-      var tmarker = markers[markerData.name];
+      var tmarker = markers[markerData.id];
       theMap.removeLayer(tmarker);
     }
 
     scope.addMarker = function(markerData){
       var coords=markerData.coords;
-      var name=markerData.name;
+      var id=markerData.id;
       var marker = new L.marker(coords,{draggable:'true'})
         .bindPopup("<img src='tree.png' alt='"+ markerData.desc +"'></img>");
 
       marker.on('dragend',function(event){
         var tmarker = event.target;
-        var startMarker = markers[tmarker.name];
-        var startPos = originalPos[tmarker.name];
+        var startMarker = markers[tmarker.id];
+        var startPos = originalPos[tmarker.id];
 
         if(!theMap.getBounds().contains(tmarker.getLatLng()))
         {
@@ -58,6 +61,11 @@ angular.module('wheretoseeApp')
       originalPos[name] = marker.getLatLng();
     }
 
+    theMap.invalidateSize();
+
+    scope.invalidateMap = function(){
+      theMap.invalidateSize();
+    };
   }
 
   return {
@@ -65,4 +73,4 @@ angular.module('wheretoseeApp')
     restrict: 'E',
       link: link
   };
-});
+}]);

@@ -1,5 +1,5 @@
 angular.module('wheretoseeApp')
- .directive('map', ['$interval','socketService',function ($interval,socketService) {
+ .directive('map', ['$interval','socketService','$rootScope',function ($interval,socketService,$rootScope) {
 
   function link(scope, element, attrs) {
     var mapDiv = $('#map');
@@ -31,41 +31,50 @@ angular.module('wheretoseeApp')
       console.log("Lat, Lon : " + e.latlng.lat + ", " + e.latlng.lng)
     });
 
-    scope.removeMarker = function(markerData){
-      var tmarker = markers[markerData.id];
+    $rootScope.$on('wheretosee:retrieved_artifact',function(meta,data){
+      scope.addMarker(data);
+    });
+
+    $rootScope.$on('wheretosee:removed_artifact',function(meta,artifact){
+      scope.removeMarker(artifact);
+    });
+
+    scope.removeMarker = function(artifact){
+      var tmarker = markers[artifact.id];
+      delete markers[tmarker.id];
       theMap.removeLayer(tmarker);
     }
 
-    scope.addMarker = function(markerData){
-      var coords=markerData.coords;
-      var id=markerData.id;
-      var marker = new L.marker(coords,{draggable:'true'})
-        .bindPopup("<img src='tree.png' alt='"+ markerData.desc +"'></img>");
-
-      marker.on('dragend',function(event){
-        var tmarker = event.target;
-        var startMarker = markers[tmarker.id];
-        var startPos = originalPos[tmarker.id];
-
-        if(!theMap.getBounds().contains(tmarker.getLatLng()))
-        {
-          theMap.removeLayer(tmarker);
-        }else{
-          tmarker.setLatLng(startPos);
-        }
-      });
-
-      marker.addTo(theMap);
-      markers[name] = marker;
-      marker['name'] = name;
-      originalPos[name] = marker.getLatLng();
+    var _removeMarkerFromMap = function(event){
+      var tmarker = event.target;
+      var startMarker = markers[tmarker.id];
+      var startPos = originalPos[tmarker.id];
+      if(!theMap.getBounds().contains(tmarker.getLatLng()))
+      {
+        theMap.removeLayer(tmarker);
+        delete markers[tmarker.id];
+        $rootScope.$emit('wheretosee:map_removed_artifact',tmarker.id);
+      }else{
+        tmarker.setLatLng(startPos);
+      }
     }
 
+    scope.addMarker = function(markerData){
+      if(!markers.hasOwnProperty(markerData.id)){
+        var coords=markerData.coordinates;
+        var id=markerData.id;
+        var name=markerData.name;
+        var marker = new L.marker(coords,{draggable:'true'})
+          .bindPopup("<div>Name: "+ markerData.name +"</div><div>Description: " + markerData.description + "</div>");
+        marker.on('dragend',_removeMarkerFromMap);
+        marker.addTo(theMap);
+        marker['id'] = id;
+        marker['name'] = name;
+        markers[id] = marker;
+        originalPos[id] = marker.getLatLng();
+      }
+    }
     theMap.invalidateSize();
-
-    scope.invalidateMap = function(){
-      theMap.invalidateSize();
-    };
   }
 
   return {

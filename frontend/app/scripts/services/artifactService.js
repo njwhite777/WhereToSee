@@ -8,12 +8,9 @@
  */
 
 angular.module('wheretoseeApp')
-  .service('artifactService',['socketService',function(socketService){
+  .service('artifactService',['socketService','$rootScope',function(socketService,$rootScope){
     var socket = socketService['artifactSocket'];
-
-    var artifactData = {
-
-    };
+    var artifactData = {};
 
     var retrieveArtifact = function(data){
       data['artifactID']=data.id;
@@ -21,11 +18,21 @@ angular.module('wheretoseeApp')
     };
 
     socket.on('retrieved_artifact',function(data){
+      $rootScope.$emit('wheretosee:retrieved_artifact',data);
       artifactData[data.id]=data;
     });
 
-    var removeArtifact = function(artifactID){
-      delete artifactData[artifactID];
+    $rootScope.$on('wheretosee:map_removed_artifact',function(meta,artifactID){
+      if(artifactData.hasOwnProperty(artifactID)) {
+        $rootScope.$apply(function(){
+          delete artifactData[artifactID];
+        });
+      }
+    });
+
+    var removeArtifact = function(artifact){
+      $rootScope.$emit('wheretosee:removed_artifact',artifact);
+      delete artifactData[artifact.id];
     }
 
     return {

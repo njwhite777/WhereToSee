@@ -1,0 +1,25 @@
+#!/usr/bin/env python
+import argparse
+from app import app,socketio,engine,Session
+from flask_cors import CORS
+from db import create_db,delete_db
+from models import Base as AppModelBase
+from socketIO import *
+import unittest
+import json
+import glob
+
+def create_test_suite():
+    test_file_strings = glob.glob('tests/test_*.py')
+    module_strings = ['tests.'+str[6:len(str)-3] for str in test_file_strings]
+    suites = [unittest.defaultTestLoader.loadTestsFromName(name) \
+              for name in module_strings]
+    testSuite = unittest.TestSuite(suites)
+    return testSuite
+
+if __name__ == '__main__':
+    CORS(app)
+    testSuite = create_test_suite()
+    socketio.init_app(app)
+
+    text_runner = unittest.TextTestRunner().run(testSuite)
